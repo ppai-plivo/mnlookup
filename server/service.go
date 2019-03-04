@@ -33,8 +33,8 @@ func (s *Service) Handler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
 
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(record); err != nil {

@@ -7,39 +7,31 @@ import (
 
 	"github.com/ppai-plivo/mnlookup/api"
 
-	radix "github.com/hashicorp/go-immutable-radix"
+	radix "github.com/armon/go-radix"
 )
 
 type RadixTree struct {
 	tree *radix.Tree
 }
 
-func (t *RadixTree) Dump() {
-	walkfn := func(k []byte, v interface{}) bool {
-		fmt.Println(string(k), v)
-		return false
-	}
-
-	t.tree.Root().Walk(walkfn)
-}
-
 func (t *RadixTree) Lookup(number string) (*api.Record, error) {
-	_, value, ok := t.tree.Root().LongestPrefix([]byte(number))
+	_, value, ok := t.tree.LongestPrefix(number)
 	if !ok {
 		return nil, fmt.Errorf("Not Found")
 	}
 
-	r, ok := value.(api.Record)
+	r, ok := value.(*api.Record)
 	if !ok {
 		return nil, fmt.Errorf("Entry corrupt")
 	}
 
-	return &r, nil
+	return r, nil
 }
 
 func New(reader io.Reader) (*RadixTree, error) {
 
 	r := csv.NewReader(reader)
+	r.ReuseRecord = true
 
 	// read column titles
 	if _, err := r.Read(); err != nil {
@@ -66,8 +58,8 @@ func New(reader io.Reader) (*RadixTree, error) {
 			continue
 		}
 
-		tree, _, _ = tree.Insert([]byte(prefix),
-			api.Record{
+		_, _ = tree.Insert(prefix,
+			&api.Record{
 				Prefix: prefix,
 				MCC:    mcc,
 				MNC:    mnc,

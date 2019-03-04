@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"time"
 
 	"github.com/ppai-plivo/mnlookup/radix"
@@ -23,13 +24,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer f.Close()
 
 	log.Printf("Parsing file: %s\n", csvFile)
 	tree, err := radix.New(f)
 	if err != nil {
 		log.Fatal(err)
 	}
+	f.Close()
+	runtime.GC()
 
 	svc := server.NewService(tree)
 
