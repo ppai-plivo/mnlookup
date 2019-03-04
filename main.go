@@ -32,6 +32,7 @@ func main() {
 	}
 	f.Close()
 	runtime.GC()
+	log.Printf("Loaded prefixes: %+v\n", tree.CountByNumType())
 
 	svc := server.NewService(tree)
 

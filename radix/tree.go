@@ -11,7 +11,12 @@ import (
 )
 
 type RadixTree struct {
-	tree *radix.Tree
+	tree           *radix.Tree
+	countByNumType map[string]int
+}
+
+func (t *RadixTree) CountByNumType() map[string]int {
+	return t.countByNumType
 }
 
 func (t *RadixTree) Lookup(number string) (*api.Record, error) {
@@ -40,6 +45,7 @@ func New(reader io.Reader) (*RadixTree, error) {
 
 	tree := radix.New()
 
+	countByNumType := make(map[string]int)
 	for {
 		record, err := r.Read()
 		if err == io.EOF {
@@ -49,12 +55,13 @@ func New(reader io.Reader) (*RadixTree, error) {
 			return nil, err
 		}
 
+		countByNumType[record[7]]++
+
 		prefix := record[0]
-		number_type := record[7]
 		mcc := record[8]
 		mnc := record[9]
 
-		if (number_type != "MOB") || mcc == "" || mnc == "" {
+		if mcc == "" || mnc == "" {
 			continue
 		}
 
@@ -67,6 +74,7 @@ func New(reader io.Reader) (*RadixTree, error) {
 	}
 
 	return &RadixTree{
-		tree: tree,
+		tree:           tree,
+		countByNumType: countByNumType,
 	}, nil
 }
