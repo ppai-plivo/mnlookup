@@ -11,6 +11,10 @@ type Store struct {
 	tree *Tree
 }
 
+func (t *Store) Len() int {
+	return t.tree.Len()
+}
+
 func (t *Store) Lookup(number string) (Value, error) {
 	_, value, ok := t.tree.LongestPrefix(number)
 	if !ok {

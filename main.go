@@ -32,6 +32,7 @@ func main() {
 	}
 	f.Close()
 	runtime.GC()
+	log.Printf("Loaded %d prefixes", s.Len())
 
 	svc := server.NewService(s)
 
