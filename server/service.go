@@ -8,12 +8,13 @@ import (
 	"strings"
 
 	"github.com/ppai-plivo/mnlookup/api"
+	"github.com/ppai-plivo/mnlookup/store"
 
 	"github.com/nyaruka/phonenumbers"
 )
 
 type LookupService interface {
-	Lookup(number string) (*api.Record, error)
+	Lookup(number string) (store.Value, error)
 }
 
 type Service struct {
@@ -56,17 +57,22 @@ func (s *Service) Handler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	}
 
-	record, err := s.l.Lookup(number)
+	value, err := s.l.Lookup(number)
 	if err != nil {
 		log.Println(err)
 		http.NotFound(w, r)
+	}
+
+	resp := &api.Response{
+		MCC: fmt.Sprintf("%03d", value.MCC),
+		MNC: fmt.Sprintf("%03d", value.MNC),
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
 	enc := json.NewEncoder(w)
-	if err := enc.Encode(record); err != nil {
+	if err := enc.Encode(resp); err != nil {
 		log.Println(err)
 	}
 }

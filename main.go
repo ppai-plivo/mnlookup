@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ppai-plivo/mnlookup/radix"
 	"github.com/ppai-plivo/mnlookup/server"
+	"github.com/ppai-plivo/mnlookup/store"
 )
 
 const (
@@ -26,15 +26,14 @@ func main() {
 	}
 
 	log.Printf("Parsing file: %s\n", csvFile)
-	tree, err := radix.New(f)
+	s, err := store.New(f)
 	if err != nil {
 		log.Fatal(err)
 	}
 	f.Close()
 	runtime.GC()
-	log.Printf("Loaded prefixes: %+v\n", tree.CountByNumType())
 
-	svc := server.NewService(tree)
+	svc := server.NewService(s)
 
 	srv := server.New(svc)
 	go func(s *http.Server) {
